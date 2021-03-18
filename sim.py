@@ -2,12 +2,58 @@ import pygame
 import colour
 from random import randrange
 
+'''
+A simulation that is meant to show WHY team work makes the dream work.
+Players are randomly placed with velocity per random motion.
+Once an objective is within player radius, the player approaches the objective, 
+and upon reaching the objective, duels or collaborates with the player objective.
+'''
 
 class Player:
-    radius = 1
+    radius = 10
 
-    def __init__(self, row=0, col=0):
+    def __init__(self, row=0, col=0, sources=100):
         self.position = (row, col)
+        self.velocity = (randrange(self.radius) - self.radius//2,
+                         randrange(self.radius) - self.radius//2)
+
+    def move(self):
+        '''
+        Single iteration of a player
+        '''
+        self.position = (self.position[0] + self.velocity[0],
+                         self.position[1] + self.velocity[1])
+
+
+class Jedi(Player):
+    '''
+    Jedis try ONLY try to maximize average resources points to Jedi collectively.
+    Upon impact with Jedi, Jedis will split their resource points evenly.
+    Upon impact with Sith, Sith steals resource points from Jedi and reallocs
+    the gained resources to its own resources.
+    '''
+    def __init__(self):
+        super().__init__()
+        
+
+        # Jedis have the "right" things for the "right" reasons
+        self.lust_resources = randrange(100)
+        self.gluttony_resources = randrange(100)
+        self.greed_resources = randrange(100)
+        self.sloth_resources = randrange(100)
+        self.wrath_resources = randrange(100)
+        self.envy_resources = randrange(100)
+        self.pride_resources = randrange(100)
+
+
+class Sith(Player):
+    '''
+    Sith tries to maximize resource points for itself.
+    '''
+    def __init__(self):
+        super().__init__()
+
+
 
 class Arena:
     '''
@@ -44,13 +90,20 @@ class Arena:
         '''
         Prepares new positions for all players, redraws them, and ticks the clock
         '''
-        # Determine new positions for all players. Note, these
+        # Reset the screen to black. Old drawings persist.
+        self.screen.fill((0, 0, 0))
 
-        # Increment time
-        self.clock.tick()
+        # Determine new positions for all players.
+        for player in self.players:
+            player.move()
+            self.drawPlayer(player)
+
+        # Draw and increment time
+        pygame.display.update()
+        self.clock.tick(60)
         print('t=%d\n' % self.clock.get_time())
 
-def main(rows=256, cols=256):
+def main(rows=512, cols=512):
     pygame.init()
     pygame.display.set_caption('Jedi vs. Sith')
     screen = pygame.display.set_mode((rows, cols))
@@ -68,7 +121,7 @@ def main(rows=256, cols=256):
                 arena.addPlayer()
 
             if event.type == pygame.QUIT:
-                pass
+               simulating = False
 
         # Iterate the arena
         arena.incrementTime()
