@@ -57,7 +57,7 @@ class Player:
             return solution
 
         if collided_vertical and start_velocity[0] != 0:
-            if predicted_position[1] >= 0:
+            if predicted_position[0] >= 0:
                 ticks_till_vcollision = math.ceil( (bounding_rows - start_position[0]) / start_velocity[0])
             else:
                 ticks_till_vcollision = math.ceil( (0 - start_position[0]) / start_velocity[0])
@@ -68,7 +68,7 @@ class Player:
                                    start_position[1] + ticks_till_vcollision * start_velocity[1]]
 
         if collided_horizontal and start_velocity[1] != 0:
-            if predicted_position[0] >= 0:
+            if predicted_position[1] >= 0:
                 ticks_till_hcollision = math.ceil( (bounding_cols - start_position[1]) / start_velocity[1])
             else:
                 ticks_till_hcollision = math.ceil( (0 - start_position[1]) / start_velocity[1])
@@ -82,12 +82,10 @@ class Player:
            ticks_till_collision = min(ticks_till_vcollision, ticks_till_hcollision)
            collision_position = [start_position[0] + ticks_till_collision * start_velocity[0],
                                 start_position[1] + ticks_till_collision * start_velocity[1]]
-           consequent_velocity[0] = -start_velocity[0]
-           consequent_velocity[1] = -start_velocity[1]
-
-        # We've solved for tentative collision point, and have resulting velocity.
-        collision_position = hcollision_position if vcollision_position is None else vcollision_position
-        ticks_till_collision = ticks_till_hcollision if ticks_till_vcollision is None else ticks_till_vcollision
+        else:
+            # We've solved for tentative collision point, and have resulting velocity.
+            collision_position = hcollision_position if vcollision_position is None else vcollision_position
+            ticks_till_collision = ticks_till_hcollision if ticks_till_vcollision is None else ticks_till_vcollision
 
         # Save this segment, and solve the save problem from new collision point
         solution.append((start_position, collision_position))
@@ -103,13 +101,19 @@ class Player:
         pygame.draw.circle(screen, (0,0,255), self.position, self.radius)
         self.drawTrajectory(screen)
 
-    def drawTrajectory(self, screen, ticks_into_future=64):
+    def drawTrajectory(self, screen, ticks_into_future=264):
         '''
         Trajectory is always linear, and is represented as a sequence of lines
         :return:
         '''
         trajectory = []
-        self.trajectory(self.position, self.velocity, ticks_into_future, screen.get_height(), screen.get_width(), trajectory)
+        self.trajectory(self.position,
+                        self.velocity,
+                        ticks_into_future,
+                        screen.get_height(),
+                        screen.get_width(),
+                        trajectory)
+
         for segment in trajectory:
             pygame.draw.line(screen, (0,255,0), segment[0], segment[1])
 
