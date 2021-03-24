@@ -11,32 +11,28 @@ and upon reaching the objective, duels or collaborates with the player objective
 '''
 
 class Trajectory:
-    def __init__(self, row=0, col=0, row_velocity=0, col_velocity=0):
-        pass
+    def __init__(self, row=0, col=0,
+                       row_velocity=0, col_velocity=0,
+                       row_low=0, row_high=100, col_low=0, col_high=100):
+        # Set boundaries
+        self.row_high = row_high
+        self.row_low = row_low
+        self.col_high = col_high
+        self.col_low = col_low
 
-class Player:
-    radius = 10
-
-    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
+        # Kinetics
         self.position = [row, col]
         self.velocity = [row_velocity, col_velocity]
 
-        # Sequence of linear segments
+
+        # Trajectory representation as list of linear segments
         # Note the longest path is the diagonal
-        s
-        self.foresight_ticks = math.ceil( math.sqrt(2) * screen.get_height() )
-        self.trajectory = []
-        self.solveTrajectory(self.position,
-                             self.velocity,
-                             self.,
-                             screen.get_height(),
-                             screen.get_width(),
-                             self.trajectory)
+        self.foresight_ticks = math.ceil(math.sqrt( (col_high - col_low)**2 + (row_high - row_low)**2))
+        self.n_segments = 4
+        self.segments = []
+        self.solve(self.position, self.velocity, self.n_segments, self.segments)
 
-    def isStationary(self):
-        return self.velocity == [0, 0]
-
-    def move(self, bounding_row, bounding_col):
+    def move(self):
         '''
         Single iteration of a player
         '''
@@ -45,39 +41,33 @@ class Player:
                          self.position[1] + self.velocity[1]]
 
         if not self.isStationary():
-            segment = self.trajectory[0]
+            segment = self.segments[0]
             collision_point = segment[1]
             next_velocity   = segment[2]
-            ticks_in_segment = segment[3]
 
             if self.position == collision_point:
                 # The segment is done. Update per its solutions
-                self.trajectory.pop(0)
+                self.segments.pop(0)
                 self.velocity = next_velocity
 
                 # Replaced the used up segment by appending a new one
-                final_segment = self.trajectory[-1]
+                final_segment = self.segments[-1]
                 final_position = final_segment[1]
                 final_velocity = final_segment[2]
-                next_trajectory = self.solveTrajectory(final_position,
-                                     final_velocity,
-                                     self.foresight_ticks,
-                                     bounding_row,
-                                     bounding_col,
-                                     self.trajectory)
-                pass
+                next_trajectory = self.solve(final_position,
+                                             final_velocity,
+                                             0,
+                                             self.segments)
 
+    def isStationary(self):
+        return self.velocity == [0, 0]
 
-    def solveTrajectory(self, start_position, start_velocity, tick, bounding_rows, bounding_cols, solution):
+    def solve(self, start_position, start_velocity, segment_i, solution):
         '''
         Get predicted position of player in N ticks
         '''
-        if tick <= 0:
+        if segment_i < 0:
             return solution
-
-        # Don't let players go off screen
-        bounding_cols -= self.radius
-        bounding_rows -= self.radius
 
         # We need to solve for collision point, however we must take into account that collisions
         # can occur "off the wall" since velocity increments in discrete steps
@@ -88,18 +78,18 @@ class Player:
         col = start_position[1]
 
         if row_velocity > 0:
-            ticks_to_row_collision = math.ceil( (bounding_rows - row) / row_velocity )
+            ticks_to_row_collision = math.ceil( (self.row_high - row) / row_velocity )
         elif row_velocity == 0:
             ticks_to_row_collision = None
         else:
-            ticks_to_row_collision = math.ceil( (row - self.radius) / abs(row_velocity) )
+            ticks_to_row_collision = math.ceil( (row - self.row_low) / abs(row_velocity) )
 
         if col_velocity > 0:
-            ticks_to_col_collision = math.ceil( (bounding_cols - col) / col_velocity )
+            ticks_to_col_collision = math.ceil( (self.col_high - col) / col_velocity )
         elif col_velocity == 0:
             ticks_to_col_collision = None
         else:
-            ticks_to_col_collision = math.ceil( (col - self.radius) / abs(col_velocity) )
+            ticks_to_col_collision = math.ceil( (col - self.col_low) / abs(col_velocity) )
 
 
 
@@ -125,28 +115,31 @@ class Player:
         else:
             # Stationary node
             ticks_to_collision = None
-            return solution2
+            return solution
 
         # We now have ticks till collision. Determine point of collision, which will
         # indicate the END of a trajectory segment
         collision_point = [row + ticks_to_collision * row_velocity,
                            col + ticks_to_collision * col_velocity]
 
-        solution.append((start_position, collision_point, next_velocity, ticks_to_collision))
+        solution.append((start_position, collision_point, next_velocity))
 
+        return self.solve( collision_point,
+                           next_velocity,
+                           segment_i - 1,
+                           solution)
 
-        # If we haven't sufficed foresight request, get more trajectory segments
-        ticks_remaining = tick - ticks_to_collision
-        return self.solveTrajectory( collision_point,
-                                     next_velocity,
-                                     ticks_remaining,
-                                     bounding_rows,
-                                     bounding_cols,
-                                     solution)
+class Player:
+    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
+        self.radius = 10
+        self.trajectory = Trajectory(row, col,
+                                     row_velocity, col_velocity,
+                                     self.radius, screen.get_height() - self.radius,
+                                     self.radius, screen.get_width() - self.radius)
 
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0,0,255), self.position, self.radius)
+        pygame.draw.circle(screen, (0,0,255), self.trajectory.position, self.radius)
         self.drawTrajectory(screen)
 
     def drawTrajectory(self, screen, ticks_into_future=100):
@@ -155,10 +148,15 @@ class Player:
         :return:
         '''
         red = 0
-        for segment in self.trajectory:
-            pygame.draw.line(screen, (red,255,0), segment[0], segment[1])
+        blue = 0
+        for segment in self.trajectory.segments:
+            pygame.draw.line(screen, (red,255,blue), segment[0], segment[1])
             pygame.display.update()
-            red += 10
+            red = (red + 50) % 256
+            blue = (blue + 50) % 256
+
+    def move(self):
+        self.trajectory.move()
 
 class Jedi(Player):
     '''
@@ -243,7 +241,7 @@ class Arena:
         # Determine new positions for all players.
         for player in self.players:
             self.collidePlayers(player)
-            player.move(self.rows, self.cols)
+            player.move()
             player.draw(self.screen)
             pygame.display.update()
 
