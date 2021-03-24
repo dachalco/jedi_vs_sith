@@ -131,6 +131,7 @@ class Trajectory:
 
 class Player:
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
+        self.color = (0, 255, 0)
         self.radius = 10
         self.trajectory = Trajectory(row, col,
                                      row_velocity, col_velocity,
@@ -139,7 +140,7 @@ class Player:
 
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0,0,255), self.trajectory.position, self.radius)
+        pygame.draw.circle(screen, self.color, self.trajectory.position, self.radius)
         self.drawTrajectory(screen)
 
     def drawTrajectory(self, screen, ticks_into_future=100):
@@ -167,7 +168,8 @@ class Jedi(Player):
     '''
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
         super().__init__(screen, row, col, row_velocity, col_velocity, sources)
-        
+
+        self.color = (0, 0, 255)
 
         # Jedis have the "right" things for the "right" reasons
         self.lust_resources = randrange(100)
@@ -186,7 +188,7 @@ class Sith(Player):
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
         super().__init__(screen, row, col, row_velocity, col_velocity, sources)
 
-
+        self.color = (255, 0, 0)
 
 class Arena:
     '''
@@ -201,20 +203,10 @@ class Arena:
         self.clock = pygame.time.Clock()
         self.players = set()
 
-    def addJedi(self):
+    def addPlayer(self, newb):
         '''
         Creates a new player, with random position in arena
         '''
-
-        #newb = Player(self.screen,
-        #              randrange(self.rows),
-        #              randrange(self.cols),
-        #              randrange(screen.get_height() // 10) ,
-        #              randrange(screen.get_width() // 10))
-
-        newb = Player(self.screen,
-                      100, 315,
-                      5, -3)
 
         newb.draw(self.screen)
         self.players.add(newb)
@@ -264,10 +256,20 @@ def main(rows=512, cols=512):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.MOUSEBUTTONUP:
-                arena.addJedi()
+                if event.button == 1:
+                    arena.addPlayer(Jedi(screen,
+                                         randrange(screen.get_height()),
+                                         randrange(screen.get_width()),
+                                         randrange(10),
+                                         randrange(10)))
+                elif event.button == 3:
+                    arena.addPlayer(Sith(screen,
+                                         randrange(screen.get_height()),
+                                         randrange(screen.get_width()),
+                                         randrange(10),
+                                         randrange(10)))
                 print(pygame.mouse.get_pos())
-
-            if event.type == pygame.QUIT:
+            elif event.type == pygame.QUIT:
                simulating = False
 
         # Iterate the arena
