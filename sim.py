@@ -1,3 +1,4 @@
+import os
 import pygame
 import colour
 import math
@@ -129,14 +130,17 @@ class Trajectory:
                            segment_i - 1,
                            solution)
 
-class Player:
-    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
+class Player(pygame.sprite.Sprite):
+    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100, groups=[]):
+        pygame.sprite.Sprite.__init__(self)
+
         self.color = (0, 255, 0)
         self.radius = 10
         self.trajectory = Trajectory(row, col,
                                      row_velocity, col_velocity,
                                      self.radius, screen.get_height() - self.radius,
                                      self.radius, screen.get_width() - self.radius)
+
 
 
     def draw(self, screen):
@@ -166,8 +170,11 @@ class Jedi(Player):
     Upon impact with Sith, Sith steals resource points from Jedi and reallocs
     the gained resources to its own resources.
     '''
+
+    group = pygame.sprite.Group()
+
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
-        super().__init__(screen, row, col, row_velocity, col_velocity, sources)
+        Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
 
         self.color = (0, 0, 255)
 
@@ -181,65 +188,46 @@ class Jedi(Player):
         self.pride_resources = randrange(100)
 
 
+        # Configure pygame sprite
+        self.image = pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png'))
+        self.rect = self.image.get_rect()
+
+
+    def update(self):
+        self.move()
+
 class Sith(Player):
     '''
     Sith tries to maximize resource points for itself.
     '''
+
+    group = pygame.sprite.Group()
+
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
-        super().__init__(screen, row, col, row_velocity, col_velocity, sources)
+        Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
 
         self.color = (255, 0, 0)
 
-class Arena:
-    '''
-    Responsible for redrawing all players
-    '''
-    def __init__(self, screen):
-        assert type(screen) == pygame.Surface
-
-        self.screen = screen
-        self.rows = screen.get_height()
-        self.cols = screen.get_width()
-        self.clock = pygame.time.Clock()
-        self.players = set()
-
-    def addPlayer(self, newb):
-        '''
-        Creates a new player, with random position in arena
-        '''
-
-        newb.draw(self.screen)
-        self.players.add(newb)
-        pygame.display.update()
-
-    def killPlayer(self, newb):
-        assert newb in self.players, 'Can not kill non-existing player!'
-        self.players.discard(newb)
-
-    def collidePlayers(self, player):
-        '''
-        O(n^2) naive solution
-        '''
-        pass
+        # Configure pygame sprite
+        self.image = pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png'))
+        self.rect = self.image.get_rect()
 
 
-    def incrementTime(self):
-        '''
-        Prepares new positions for all players, redraws them, and ticks the clock
-        '''
-        # Reset the screen to black. Old drawings persist.
-        self.screen.fill((0, 0, 0))
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, self.trajectory.position, self.radius)
 
-        # Determine new positions for all players.
-        for player in self.players:
-            self.collidePlayers(player)
-            player.move()
-            player.draw(self.screen)
-            pygame.display.update()
+    def update(self):
+        self.move()
 
-        # Draw and increment time
-        pygame.display.update()
-        self.clock.tick(60)
+def spawnSith(screen):
+    # Spawn some Sith by default
+    for i in range(10):
+        member = Sith(screen,
+                      randrange(screen.get_height()),
+                      randrange(screen.get_width()),
+                      randrange(5),
+                      randrange(5))
+
 
 def main(rows=512, cols=512):
     pygame.init()
@@ -248,8 +236,10 @@ def main(rows=512, cols=512):
     screen.fill((0, 0, 0))
     pygame.display.update()
 
-    arena = Arena(screen)
+    # Some sith are spawned by default
+    spawnSith(screen)
 
+    # Simulate time in arena
     simulating = True
     while simulating:
         # First process events
@@ -257,23 +247,23 @@ def main(rows=512, cols=512):
         for event in events:
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    arena.addPlayer(Jedi(screen,
-                                         randrange(screen.get_height()),
-                                         randrange(screen.get_width()),
-                                         randrange(10),
-                                         randrange(10)))
+                    # left click
+                    Jedi(screen,
+                         randrange(screen.get_height()),
+                         randrange(screen.get_width()),
+                         randrange(10),
+                         randrange(10))
                 elif event.button == 3:
-                    arena.addPlayer(Sith(screen,
-                                         randrange(screen.get_height()),
-                                         randrange(screen.get_width()),
-                                         randrange(10),
-                                         randrange(10)))
+                    # right click
+                    pass
+
                 print(pygame.mouse.get_pos())
             elif event.type == pygame.QUIT:
                simulating = False
 
         # Iterate the arena
-        arena.incrementTime()
+        Jedi.group.update()
+        Sith.group.update()
 
 if __name__ == '__main__':
     exit(main())
