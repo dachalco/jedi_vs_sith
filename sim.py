@@ -33,7 +33,9 @@ class Player(pygame.sprite.DirtySprite):
             self.trajectory.draw(self.screen)
 
     def move(self):
-        [self.rect.x, self.rect.y] = self.trajectory.move()
+        (row, col) = self.trajectory.move()
+        self.rect.x = row - self.image.get_height() // 2
+        self.rect.y = col - self.image.get_width() // 2
 
     def update(self):
         self.clear()
