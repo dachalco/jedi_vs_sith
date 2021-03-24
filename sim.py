@@ -163,6 +163,10 @@ class Player(pygame.sprite.Sprite):
     def move(self):
         self.trajectory.move()
 
+    def update(self):
+        self.move()
+        self.draw()
+
 class Jedi(Player):
     '''
     Jedis try ONLY try to maximize average resources points to Jedi collectively.
@@ -175,6 +179,7 @@ class Jedi(Player):
 
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
         Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
+        self.add([Jedi.group])
 
         self.color = (0, 0, 255)
 
@@ -189,12 +194,14 @@ class Jedi(Player):
 
 
         # Configure pygame sprite
+        self.screen = screen
         self.image = pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png'))
         self.rect = self.image.get_rect()
 
 
     def update(self):
         self.move()
+        self.draw(self.screen)
 
 class Sith(Player):
     '''
@@ -209,15 +216,17 @@ class Sith(Player):
         self.color = (255, 0, 0)
 
         # Configure pygame sprite
+        self.screen = screen
         self.image = pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png'))
         self.rect = self.image.get_rect()
 
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.color, self.trajectory.position, self.radius)
+    def draw(self):
+        pygame.draw.circle(self.screen, self.color, self.trajectory.position, self.radius)
 
     def update(self):
         self.move()
+        self.draw(self.screen)
 
 def spawnSith(screen):
     # Spawn some Sith by default
@@ -234,6 +243,7 @@ def main(rows=512, cols=512):
     pygame.display.set_caption('Jedi vs. Sith')
     screen = pygame.display.set_mode((rows, cols))
     screen.fill((0, 0, 0))
+    clock = pygame.time.Clock()
     pygame.display.update()
 
     # Some sith are spawned by default
@@ -262,8 +272,11 @@ def main(rows=512, cols=512):
                simulating = False
 
         # Iterate the arena
+        screen.fill((0, 0, 0))
         Jedi.group.update()
         Sith.group.update()
+        pygame.display.update()
+        clock.tick(60)
 
 if __name__ == '__main__':
     exit(main())
