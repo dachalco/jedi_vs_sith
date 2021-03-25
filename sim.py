@@ -16,7 +16,7 @@ and upon reaching the objective, duels or collaborates with the player objective
 
 def spawnSith(screen):
     # Spawn some Sith by default
-    for i in range(10):
+    for i in range(2):
         member = Sith(screen,
                       randrange(screen.get_height()),
                       randrange(screen.get_width()),

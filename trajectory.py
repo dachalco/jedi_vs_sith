@@ -4,7 +4,8 @@ import pygame
 class Trajectory:
     def __init__(self, row=0, col=0,
                  row_velocity=0, col_velocity=0,
-                 row_low=0, row_high=100, col_low=0, col_high=100):
+                 row_low=0, row_high=100, col_low=0, col_high=100,
+                 mass=1):
         # Set boundaries
         self.row_high = row_high
         self.row_low = row_low
@@ -12,6 +13,7 @@ class Trajectory:
         self.col_low = col_low
 
         # Kinetics
+        self.mass     = mass
         self.position = [row, col]
         self.velocity = [row_velocity, col_velocity]
 
@@ -121,6 +123,19 @@ class Trajectory:
                            next_velocity,
                            segment_i - 1,
                            solution)
+
+    def collideInertias(self, inertia_a, intertia_b):
+        '''
+        Kinematics for collision of two bodies of mass. Nullifies previous trajectories and replaces with new
+        trajectories based on kinematic collision. Mass is considered equal, for simplification.
+        For simplification, masses are equal
+        For simplification, bodies are considered circular.
+        Therefore, each trajectory is simply reflected upon tangential collision line
+
+        :return:
+        '''
+
+        # Solve for tangent line to collision point. It's orthogonal to line between centers of bodies.
 
     def draw(self, screen):
         for segment in self.segments:
