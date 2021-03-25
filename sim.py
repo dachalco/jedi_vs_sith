@@ -38,7 +38,6 @@ class Player(pygame.sprite.DirtySprite):
         self.rect.y = col - self.image.get_width() // 2
 
     def update(self):
-        self.clear()
         self.move()
         self.draw()
 
@@ -74,11 +73,6 @@ class Jedi(Player):
         self.image = pygame.transform.scale(self.image, [25,25])
         self.rect = self.image.get_rect()
 
-
-    def update(self):
-        self.move()
-        self.draw()
-
 class Sith(Player):
     '''
     Sith tries to maximize resource points for itself.
@@ -96,9 +90,8 @@ class Sith(Player):
         # Configure pygame sprite
         self.screen = screen
         self.image = pygame.image.load(os.path.join('assets', 'sith', 'sith.png'))
+        self.image = pygame.transform.scale(self.image, [25, 25])
         self.rect = self.image.get_rect()
-
-
 
 
 def spawnSith(screen):
@@ -120,7 +113,7 @@ def main(rows=512, cols=512):
     pygame.display.update()
 
     # Some sith are spawned by default
-    #spawnSith(screen)
+    spawnSith(screen)
 
     # Simulate time in arena
     simulating = True
@@ -148,8 +141,8 @@ def main(rows=512, cols=512):
         Jedi.group.update()
         Jedi.group.draw(screen)
 
-        #Sith.group.update()
-        #Sith.group.draw(screen)
+        Sith.group.update()
+        Sith.group.draw(screen)
 
         pygame.display.update()
         clock.tick(30)
