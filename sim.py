@@ -3,7 +3,8 @@ import pygame
 import colour
 import math
 from random import randrange
-from trajectory import Trajectory
+from sith import Sith
+from jedi import Jedi
 
 '''
 A simulation that is meant to show WHY team work makes the dream work.
@@ -12,86 +13,6 @@ Once an objective is within player radius, the player approaches the objective,
 and upon reaching the objective, duels or collaborates with the player objective.
 '''
 
-class Player(pygame.sprite.DirtySprite):
-
-    show_trajectory = True
-
-    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100, groups=[]):
-        pygame.sprite.Sprite.__init__(self)
-
-
-        self.screen = screen
-        self.color = (0, 255, 0)
-        self.radius = 10
-        self.trajectory = Trajectory(row, col,
-                                     row_velocity, col_velocity,
-                                     self.radius, screen.get_height() - self.radius,
-                                     self.radius, screen.get_width() - self.radius)
-
-    def draw(self):
-
-        if self.show_trajectory:
-            self.trajectory.draw(self.screen)
-
-    def move(self):
-        (row, col) = self.trajectory.move(self.screen)
-        self.rect.x = row - self.image.get_height() // 2
-        self.rect.y = col - self.image.get_width() // 2
-
-    def update(self):
-        self.move()
-        self.draw()
-
-class Jedi(Player):
-    '''
-    Jedis try ONLY try to maximize average resources points to Jedi collectively.
-    Upon impact with Jedi, Jedis will split their resource points evenly.
-    Upon impact with Sith, Sith steals resource points from Jedi and reallocs
-    the gained resources to its own resources.
-    '''
-
-    group = pygame.sprite.Group()
-    image = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png')), [25, 25])
-
-    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
-        Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
-        self.add([Jedi.group])
-
-        self.color = (0, 0, 255)
-
-        # Jedis have the "right" things for the "right" reasons
-        self.lust_resources = randrange(100)
-        self.gluttony_resources = randrange(100)
-        self.greed_resources = randrange(100)
-        self.sloth_resources = randrange(100)
-        self.wrath_resources = randrange(100)
-        self.envy_resources = randrange(100)
-        self.pride_resources = randrange(100)
-
-        # Configure pygame sprite
-        self.screen = screen
-        self.rect = self.image.get_rect()
-
-class Sith(Player):
-    '''
-    Sith tries to maximize resource points for itself.
-    '''
-
-    group = pygame.sprite.Group()
-
-    image = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sith', 'sith.png')), [25, 25])
-
-
-    def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
-        Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
-        self.add(Sith.group)
-
-        self.show_trajectory = False
-        self.color = (255, 0, 0)
-
-        # Configure pygame sprite
-        self.screen = screen
-        self.rect = self.image.get_rect()
 
 def spawnSith(screen):
     # Spawn some Sith by default
