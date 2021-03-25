@@ -50,6 +50,7 @@ class Jedi(Player):
     '''
 
     group = pygame.sprite.Group()
+    image = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png')), [25, 25])
 
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
         Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
@@ -69,8 +70,6 @@ class Jedi(Player):
 
         # Configure pygame sprite
         self.screen = screen
-        self.image = pygame.image.load(os.path.join('assets', 'jedi', 'jedi.png'))
-        self.image = pygame.transform.scale(self.image, [25,25])
         self.rect = self.image.get_rect()
 
 class Sith(Player):
@@ -79,6 +78,9 @@ class Sith(Player):
     '''
 
     group = pygame.sprite.Group()
+
+    image = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sith', 'sith.png')), [25, 25])
+
 
     def __init__(self, screen, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
         Player.__init__(self, screen, row, col, row_velocity, col_velocity, sources)
@@ -89,10 +91,7 @@ class Sith(Player):
 
         # Configure pygame sprite
         self.screen = screen
-        self.image = pygame.image.load(os.path.join('assets', 'sith', 'sith.png'))
-        self.image = pygame.transform.scale(self.image, [25, 25])
         self.rect = self.image.get_rect()
-
 
 def spawnSith(screen):
     # Spawn some Sith by default
