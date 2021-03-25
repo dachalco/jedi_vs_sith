@@ -133,7 +133,10 @@ def main(rows=512, cols=512):
                     pass
 
                 print(pygame.mouse.get_pos())
-            elif event.type == pygame.QUIT:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    Jedi.show_trajectory = not Jedi.show_trajectory
+            if event.type == pygame.QUIT:
                simulating = False
 
         # Iterate the arena
