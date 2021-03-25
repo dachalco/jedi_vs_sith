@@ -23,7 +23,7 @@ class Trajectory:
         self.segments = []
         self.solve(self.position, self.velocity, self.n_segments, self.segments)
 
-    def move(self):
+    def move(self, screen):
         '''
         Single iteration of a player
         '''
@@ -37,8 +37,9 @@ class Trajectory:
             next_velocity   = segment[2]
 
             if self.position == collision_point:
-                # The segment is done. Update per its solutions
-                self.segments.pop(0)
+                # The segment is done. Clear it, and add a new segment
+                old_segment = self.segments.pop(0)
+                pygame.draw.line(screen, (0,0,0), old_segment[0], old_segment[1])
                 self.velocity = next_velocity
 
                 # Replaced the used up segment by appending a new one

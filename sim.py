@@ -29,11 +29,12 @@ class Player(pygame.sprite.DirtySprite):
                                      self.radius, screen.get_width() - self.radius)
 
     def draw(self):
+
         if self.show_trajectory:
             self.trajectory.draw(self.screen)
 
     def move(self):
-        (row, col) = self.trajectory.move()
+        (row, col) = self.trajectory.move(self.screen)
         self.rect.x = row - self.image.get_height() // 2
         self.rect.y = col - self.image.get_width() // 2
 
@@ -66,7 +67,6 @@ class Jedi(Player):
         self.wrath_resources = randrange(100)
         self.envy_resources = randrange(100)
         self.pride_resources = randrange(100)
-
 
         # Configure pygame sprite
         self.screen = screen
@@ -102,6 +102,9 @@ def spawnSith(screen):
                       randrange(5),
                       randrange(5))
 
+def clear_callback(surface, rect):
+    black = (0,0,0)
+    surface.fill(black, rect)
 
 def main(rows=512, cols=512):
     pygame.init()
@@ -139,11 +142,12 @@ def main(rows=512, cols=512):
                simulating = False
 
         # Iterate the arena
-        screen.fill((0, 0, 0))
         Jedi.group.update()
+        Jedi.group.clear(screen, clear_callback)
         Jedi.group.draw(screen)
 
         Sith.group.update()
+        Sith.group.clear(screen, clear_callback)
         Sith.group.draw(screen)
 
         pygame.display.update()
