@@ -58,3 +58,19 @@ class Jedi(Player):
 
     def update(self):
         super().update()
+
+    def postProcessCollision(self):
+        # Temporarily remove self from collision list. Otherwise you detect collision with self
+        self.remove(Jedi.group)
+
+        # Jedi-Jedi collision
+        collided_sprite = pygame.sprite.spritecollideany(self, Jedi.group, pygame.sprite.collide_mask)
+        if collided_sprite != None:
+            print('jedi-jedi collision')
+
+        self.add(Jedi.group)
+
+        # Jedi-Sith collision
+        collided_sprite = pygame.sprite.spritecollideany(self, Sith.group, pygame.sprite.collide_mask)
+        if collided_sprite != None:
+            print('jedi-sith collision')

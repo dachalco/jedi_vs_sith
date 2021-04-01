@@ -31,7 +31,7 @@ def clear_callback(surface, rect):
     surface.fill(black, rect)
 
 def initPhysics(screen, space):
-    space.gravity = Vec2d(0.0, -900.0)
+    space.gravity = Vec2d(0.0, 0.0)
     frame = [
         pymunk.Segment(space.static_body,
                        (0, 0), (0, screen.get_height()),

@@ -41,3 +41,6 @@ class Player(pygame.sprite.DirtySprite):
                            pygame.Color("green"),
                            (self.rect.x + self.radius, self.rect.y + self.radius),
                            int(self.shape.radius), 2)
+
+        # Process collisions
+        self.postProcessCollision()

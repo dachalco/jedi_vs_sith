@@ -44,3 +44,16 @@ class Sith(Player):
 
         self.space.add(self.body, self.shape)
 
+
+    def postProcessCollision(self):
+        # Temporarily remove self from collision list. Otherwise you detect collision with self
+        self.remove(Sith.group)
+
+        # Sith-Sith collision
+        collided_sprite = pygame.sprite.spritecollideany(self, Sith.group, pygame.sprite.collide_mask)
+        if collided_sprite != None:
+            print('sith-sith collision')
+
+        self.add(Sith.group)
+
+        # Jedi-Sith collision. This is processed once, by Jedis
