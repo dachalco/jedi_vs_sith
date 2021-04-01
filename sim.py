@@ -23,6 +23,14 @@ def spawnSith(screen):
                       randrange(5),
                       randrange(5))
 
+def spawnJedi(screen):
+    Jedi(screen,
+         100, 100,
+         2,2)
+    Jedi(screen,
+         100, 200,
+         2, -2)
+
 def clear_callback(surface, rect):
     black = (0,0,0)
     surface.fill(black, rect)
@@ -37,6 +45,7 @@ def main(rows=512, cols=512):
 
     # Some sith are spawned by default
     spawnSith(screen)
+    spawnJedi(screen)
 
     # Simulate time in arena
     simulating = True

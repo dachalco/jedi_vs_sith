@@ -1,5 +1,6 @@
 import math
 import pygame
+import sympy as sym
 
 class Trajectory:
     def __init__(self, row=0, col=0,
@@ -54,8 +55,19 @@ class Trajectory:
                                              self.segments)
         return self.position
 
+    def reset(self, screen):
+        # Clear the old segments
+        for s in self.segments:
+            pygame.draw.line(screen, (0,0,0), s[0], s[1])
+
+        self.segments = []
+        self.solve(self.position, self.velocity, self.n_segments, self.segments)
+
     def isStationary(self):
         return self.velocity == [0, 0]
+
+    def getPosition(self):
+        return self.position
 
     def solve(self, start_position, start_velocity, segment_i, solution):
         '''
@@ -124,18 +136,84 @@ class Trajectory:
                            segment_i - 1,
                            solution)
 
-    def collideInertias(self, inertia_a, intertia_b):
+    def solveCollisionRowVelocity(self, player):
+        '''
+
+        :return: consequent row velocity
+        '''
+
+        m1 = self.mass
+        v1 = self.velocity[0]
+        m2 = player.trajectory.mass
+        v2 = player.trajectory.velocity[0]
+
+
+        # Compute conserved momentum
+        M = m1*v1 + m2*v2
+
+        # Compute conserved kinetic energy
+        K = 0.5*m1*v1**2 + 0.5*m2*v2**2
+
+        # Represent the system of equations for solutions
+        v1_f, v2_f = sym.symbols('v1_f, v2_f')
+        f1 = sym.Eq(v1_f + v2_f, M)
+        f2 = sym.Eq(0.5*m1*v1_f**2 + 0.5*m2*v2_f**2, K)
+
+        # Solve the system
+        solution = sym.solve([f1, f2], (v1_f, v2_f))
+        return solution[0]
+
+    def solveCollisionColVelocity(self, player):
+        '''
+
+        :return: consequent col velocity
+        '''
+
+        m1 = self.mass
+        v1 = self.velocity[1]
+        m2 = player.trajectory.mass
+        v2 = player.trajectory.velocity[1]
+
+        # Compute conserved momentum
+        M = m1 * v1 + m2 * v2
+
+        # Compute conserved kinetic energy
+        K = 0.5 * m1 * v1 ** 2 + 0.5 * m2 * v2 ** 2
+
+        # Represent the system of equations for solutions
+        v1_f, v2_f = sym.symbols('v1_f, v2_f')
+        f1 = sym.Eq(v1_f + v2_f, M)
+        f2 = sym.Eq(0.5 * m1 * v1_f ** 2 + 0.5 * m2 * v2_f ** 2, K)
+
+        # Solve the system
+        solution = sym.solve([f1, f2], (v1_f, v2_f))
+        return solution[1]
+
+
+    def collidePlayer(self, screen, player):
         '''
         Kinematics for collision of two bodies of mass. Nullifies previous trajectories and replaces with new
-        trajectories based on kinematic collision. Mass is considered equal, for simplification.
-        For simplification, masses are equal
-        For simplification, bodies are considered circular.
-        Therefore, each trajectory is simply reflected upon tangential collision line
+        trajectories based on kinematic collision.
 
-        :return:
+        Unit mass is used, for simplification, for now.
+
+        We use conservation of energy and conservation of momentum to solve for two unknowns
         '''
 
-        # Solve for tangent line to collision point. It's orthogonal to line between centers of bodies.
+        row_velocities = self.solveCollisionRowVelocity(player)
+        col_velocities = self.solveCollisionColVelocity(player)
+
+        self.velocity[0] = row_velocities[0]
+        player.trajectory.velocity[0] = row_velocities[1]
+
+        self.velocity[1] = col_velocities[0]
+        player.trajectory.velocity[1] = col_velocities[1]
+
+        self.move(screen)
+        player.trajectory.move(screen)
+
+        self.reset(screen)
+        player.trajectory.reset(screen)
 
     def draw(self, screen):
         for segment in self.segments:

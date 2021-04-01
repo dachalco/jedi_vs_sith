@@ -27,6 +27,13 @@ class Player(pygame.sprite.DirtySprite):
         self.rect.x = row - self.image.get_height() // 2
         self.rect.y = col - self.image.get_width() // 2
 
+    def getCenterPosition(self):
+        return [self.rect.x +  self.image.get_height() // 2,
+                self.rect.y + self.image.get_width() // 2]
+
+    def getVelocity(self):
+        return self.trajectory.velocity
+
     def update(self):
         self.move()
         self.draw()

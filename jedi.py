@@ -45,6 +45,7 @@ class Jedi(Player):
         collided_sprite = pygame.sprite.spritecollideany(self, Jedi.group, pygame.sprite.collide_mask)
         if collided_sprite != None:
             print('jedi collision')
+            self.trajectory.collidePlayer(self.screen, collided_sprite)
 
         self.add(Jedi.group)
 
