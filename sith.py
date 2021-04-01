@@ -12,7 +12,7 @@ class Sith(Player):
     '''
 
     group = pygame.sprite.Group()
-    image = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sith', 'sith.png')), [50, 50])
+    image = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sith', 'sith.png')), [100, 100])
 
     def __init__(self, screen, space, row=0, col=0, row_velocity=0, col_velocity=0, sources=100):
         Player.__init__(self, screen, space, row, col, row_velocity, col_velocity, sources)
@@ -25,7 +25,7 @@ class Sith(Player):
         # Modify physics
         self.space = space
         self.color = (0, 255, 0)
-        self.radius = 25
+        self.radius = 50
         self.x = row
         self.y = col
         self.mass = 10
@@ -43,17 +43,3 @@ class Sith(Player):
         self.shape.elasticity = 1.0
 
         self.space.add(self.body, self.shape)
-
-
-    def postProcessCollision(self):
-        # Temporarily remove self from collision list. Otherwise you detect collision with self
-        self.remove(Sith.group)
-
-        # Sith-Sith collision
-        collided_sprite = pygame.sprite.spritecollideany(self, Sith.group, pygame.sprite.collide_mask)
-        if collided_sprite != None:
-            print('sith-sith collision')
-
-        self.add(Sith.group)
-
-        # Jedi-Sith collision. This is processed once, by Jedis

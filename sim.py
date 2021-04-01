@@ -102,6 +102,7 @@ def main(rows=1000, cols=1000):
 
         # Iterate the arena
         space.step(dt)
+        screen.fill((0, 0, 0))
 
         Jedi.group.update()
         Jedi.group.clear(screen, clear_callback)
