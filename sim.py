@@ -31,7 +31,7 @@ def clear_callback(surface, rect):
     surface.fill(black, rect)
 
 def initPhysics(screen, space):
-    space.gravity = Vec2d(0.0, 0.0)
+    space.gravity = Vec2d(0.0, -900.0)
     frame = [
         pymunk.Segment(space.static_body,
                        (0, 0), (0, screen.get_height()),
@@ -51,7 +51,8 @@ def initPhysics(screen, space):
     ]
 
     for l in frame:
-        l.friction = 0.5
+        l.friction = 0.0
+        l.elasticity = 1.0
     space.add(*frame)
 
 def main(rows=1000, cols=1000):

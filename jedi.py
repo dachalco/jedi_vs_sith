@@ -51,6 +51,7 @@ class Jedi(Player):
         # Physics shape
         self.shape = pymunk.Circle(radius=self.radius, body=self.body)
         self.shape.friction = 0.01
+        self.shape.elasticity = 1.0
 
         self.space.add(self.body, self.shape)
 
