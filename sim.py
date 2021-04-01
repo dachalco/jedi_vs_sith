@@ -87,8 +87,8 @@ def main(rows=1000, cols=1000):
                          space,
                          row,
                          -col + screen.get_height(),
-                         randrange(10),
-                         randrange(10))
+                         randrange(-100, 100),
+                         randrange(-100, 100))
                 elif event.button == 3:
                     pass
 
