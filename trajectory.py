@@ -161,7 +161,7 @@ class Trajectory:
 
         # Solve the system
         solution = sym.solve([f1, f2], (v1_f, v2_f))
-        return solution[0]
+        return solution[1] if len(solution) > 1 else solution[0]
 
     def solveCollisionColVelocity(self, player):
         '''
@@ -187,7 +187,7 @@ class Trajectory:
 
         # Solve the system
         solution = sym.solve([f1, f2], (v1_f, v2_f))
-        return solution[1]
+        return solution[1] if len(solution) > 1 else solution[0]
 
 
     def collidePlayer(self, screen, player):
@@ -200,20 +200,6 @@ class Trajectory:
         We use conservation of energy and conservation of momentum to solve for two unknowns
         '''
 
-        row_velocities = self.solveCollisionRowVelocity(player)
-        col_velocities = self.solveCollisionColVelocity(player)
-
-        self.velocity[0] = row_velocities[0]
-        player.trajectory.velocity[0] = row_velocities[1]
-
-        self.velocity[1] = col_velocities[0]
-        player.trajectory.velocity[1] = col_velocities[1]
-
-        self.move(screen)
-        player.trajectory.move(screen)
-
-        self.reset(screen)
-        player.trajectory.reset(screen)
 
     def draw(self, screen):
         for segment in self.segments:
