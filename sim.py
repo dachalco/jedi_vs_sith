@@ -82,10 +82,11 @@ def main(rows=1000, cols=1000):
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     # left click
+                    row, col = pygame.mouse.get_pos()
                     Jedi(screen,
                          space,
-                         randrange(screen.get_height()),
-                         randrange(screen.get_width()),
+                         row,
+                         -col + screen.get_height(),
                          randrange(10),
                          randrange(10))
                 elif event.button == 3:
