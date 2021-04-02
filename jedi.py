@@ -63,36 +63,36 @@ class Jedi(Player):
         # Jedi-Jedi collision
         collided_sprite = pygame.sprite.spritecollideany(self, Jedi.group, pygame.sprite.collide_mask)
         if collided_sprite != None:
+            print('jedi-jedi collision!')
             other_jedi = collided_sprite
 
             # Jedis help each other out
-            avg_lust_resources = (self.lust_resources + other_jedi.lust_resources) / 2
-            avg_gluttony_resources = (self.gluttony_resources + other_jedi.gluttony_resources) / 2
-            avg_greed_resources = (self.greed_resources + other_jedi.greed_resources) / 2
-            avg_sloth_resources = (self.sloth_resources + other_jedi.sloth_resources) / 2
-            avg_wrath_resources = (self.wrath_resources + other_jedi.wrath_resources) / 2
-            avg_envy_resources = (self.envy_resources + other_jedi.envy_resources) / 2
-            avg_pride_resources = (self.pride_resources + other_jedi.pride_resources) / 2
+            for i in range(7):
+                avg_resources = (self.resources[i] + other_jedi.resources[i]) / 2
+                self.resources[i] = avg_resources + 5
+                other_jedi.resources[i] = avg_resources + 5
 
-            self.lust_resources = avg_lust_resources
-            self.gluttony_resources = avg_gluttony_resources
-            self.greed_resources = avg_greed_resources
-            self.sloth_resources = avg_sloth_resources
-            self.wrath_resources = avg_wrath_resources
-            self.envy_resources = avg_envy_resources
-            self.pride_resources = avg_pride_resources
+                if self.resources[i] > 100:
+                    self.resources[i] = 100
 
-            other_jedi.lust_resources = avg_lust_resources
-            other_jedi.gluttony_resources = avg_gluttony_resources
-            other_jedi.greed_resources = avg_greed_resources
-            other_jedi.sloth_resources = avg_sloth_resources
-            other_jedi.wrath_resources = avg_wrath_resources
-            other_jedi.envy_resources = avg_envy_resources
-            other_jedi.pride_resources = avg_pride_resources
+                if other_jedi.resources[i] > 100:
+                    other_jedi.resources[i] = 100
 
         self.add(Jedi.group)
 
         # Jedi-Sith collision
         collided_sprite = pygame.sprite.spritecollideany(self, Sith.group, pygame.sprite.collide_mask)
         if collided_sprite != None:
-            print('jedi-sith collision')
+            print('jedi-sith collision!')
+            sith = collided_sprite
+
+            # Sith steal from Jedi
+            for i in range(len(self.resources)):
+                self.resources[i] -= 5
+                sith.resources[i] += 5
+
+                if self.resources[i] < 0:
+                    self.resources[i] = 0
+
+                if sith.resources[i] >= 100:
+                    sith.resources[i] = 100

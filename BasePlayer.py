@@ -13,14 +13,7 @@ class Player(pygame.sprite.DirtySprite):
         self.screen = screen
 
         # Jedis have the "right" things for the "right" reasons
-        self.lust_resources = randrange(100)
-        self.gluttony_resources = randrange(100)
-        self.greed_resources = randrange(100)
-        self.sloth_resources = randrange(100)
-        self.wrath_resources = randrange(100)
-        self.envy_resources = randrange(100)
-        self.pride_resources = randrange(100)
-
+        self.resources = [randrange(100) for i in range(7)]
 
     def draw(self):
         pass
@@ -53,19 +46,24 @@ class Player(pygame.sprite.DirtySprite):
                            int(self.shape.radius), 2)
 
         # Draw health meter
+        health = self.getHealth()
         self.drawHealth()
+
+        # Kill player
+        if health <= 0:
+            print('Player died!')
+            if hasattr(self, 'group'):
+                self.remove(self.group)
+
+            # TODO: Player needs to be removed from physics engine too. And for some reason they are still drawn??
+            self.kill()
+            del self
 
 
     def getHealth(self):
         avg = 0
-
-        avg += self.lust_resources
-        avg += self.gluttony_resources
-        avg += self.greed_resources
-        avg += self.sloth_resources
-        avg += self.wrath_resources
-        avg += self.envy_resources
-        avg += self.pride_resources
+        for r in self.resources:
+            avg += r
 
         avg /= 7
 
@@ -78,7 +76,7 @@ class Player(pygame.sprite.DirtySprite):
         health = self.getHealth()
 
         pygame.draw.line(self.screen,
-                         (200,200,200),
+                         (50,50,50),
                          (self.rect.x, self.rect.y - 5),
                          (self.rect.x + self.radius * 2, self.rect.y - 5),
                          width=6)
