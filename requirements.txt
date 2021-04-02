@@ -1,2 +1,7 @@
+cffi==1.14.5
 colour==0.1.5
+mpmath==1.2.1
+pycparser==2.20
 pygame==2.0.1
+pymunk==6.0.0
+sympy==1.7.1
